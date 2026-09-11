@@ -1,6 +1,8 @@
 # Configurador J16
 
 [![CI](https://github.com/iambot1193/j16-protocolo/actions/workflows/ci.yml/badge.svg)](https://github.com/iambot1193/j16-protocolo/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/iambot1193/j16-protocolo/actions/workflows/codeql.yml/badge.svg)](https://github.com/iambot1193/j16-protocolo/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Configurador alternativo para o rastreador GPS J16, cobrindo um protocolo de
 porta USB sem nenhuma documentação pública. Veio de uma necessidade concreta:
@@ -52,8 +54,8 @@ python j16gui.py
 ```
 
 Sem aparelho conectado, `python j16gui.py --selftest` roda os testes
-automatizados do parser de protocolo e da interface (dados 100% fictícios,
-não depende de hardware).
+automatizados do parser de protocolo e da interface — **159 verificações**,
+dados 100% fictícios, não depende de hardware. CodeQL roda no CI a cada push.
 
 ## O que tem aqui
 
