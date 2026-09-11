@@ -13,6 +13,20 @@ protocolo do zero: como validar hipóteses sem manual, como testar comandos
 desconhecidos sem arriscar um aparelho real, um bug de coordenada por escala
 errada, e comandos destrutivos escondidos ao lado de comandos inofensivos.
 
+As telas abaixo são de uma sessão de demonstração com dados 100% fictícios
+(nenhum aparelho real conectado) — mesma interface, dados de exemplo.
+
+![Aba de parâmetros: grupos, ajuda contextual e o que ainda não foi gravado](assets/parametros.png)
+
+90 parâmetros mapeados, 58 confirmados respondendo neste firmware, agrupados
+por assunto com busca, seleção em lote e indicação de valor não gravado.
+
+![Aba de monitoramento: status do sistema, telemetria do veículo e GPS ao vivo](assets/monitoramento.png)
+
+Status do sistema, telemetria do veículo e posição GPS decodificados em
+tempo real a partir do fluxo binário do aparelho — sinal, tensão, odômetro,
+satélites e coordenada, tudo atualizado a cada ciclo de leitura.
+
 ## Funcionalidades
 
 - **Tabela de parâmetros com ajuda contextual** — 90 parâmetros mapeados, 58
