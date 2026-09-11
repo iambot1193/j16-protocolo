@@ -1,5 +1,7 @@
 # Configurador J16
 
+[![CI](https://github.com/iambot1193/j16-protocolo/actions/workflows/ci.yml/badge.svg)](https://github.com/iambot1193/j16-protocolo/actions/workflows/ci.yml)
+
 Configurador alternativo para o rastreador GPS J16, cobrindo um protocolo de
 porta USB sem nenhuma documentação pública. Veio de uma necessidade concreta:
 configurar e diagnosticar em campo sem depender só da ferramenta do
