@@ -21,6 +21,11 @@ GRUPO = {
     "Economia (sleep)": (
         "Quando o aparelho dorme para gastar menos bateria, e o que continua "
         "ligado enquanto dorme."),
+    "Alarmes e agenda (so Cantrack G900L)": (
+        "Alarmes e intervalos que so o Cantrack G900L tem. Este firmware nao "
+        "grava por SZCS#: a forma que ele aceita e \"CHAVE,valor#\", e a "
+        "resposta ja volta com o estado novo. Em qualquer outro modelo estas "
+        "linhas ficam escondidas."),
     "Vibracao": (
         "O sensor de movimento interno: o quao sensivel ele e e o que um "
         "tranco dispara -- alerta, GPS, envio."),
@@ -45,7 +50,7 @@ GRUPO = {
 # (o que faz, formato, exemplo). Exemplo vazio quando nao faz sentido.
 CAMPO = {
     "SERVIP": ("Endereco IP do servidor que recebe a posicao.",
-               "IP ou dominio", "203.0.113.10"),
+               "IP ou dominio", "200.152.62.20"),
     "SERVPORT": ("Porta TCP desse servidor.", "1 a 65535", "5023"),
     "DNS_ENABLE": ("Liga a resolucao de nome: use so se o servidor for dominio, "
                    "nao IP.", "0 nao / 1 sim", ""),
@@ -53,9 +58,9 @@ CAMPO = {
                    "se usa -- deixe vazio.", "IP ou dominio", ""),
     "SERV2_PORT": ("Porta do segundo servidor. Nao se usa.", "1 a 65535", ""),
     "APN": ("APN do chip -- e o que da internet ao aparelho. Vem da operadora "
-            "ou da revenda do chip.", "texto", "operadora.exemplo.br"),
-    "USERPPP": ("Usuario do APN, se a operadora exigir.", "texto", "usuario"),
-    "PWPPP": ("Senha do APN, se a operadora exigir.", "texto", "senha"),
+            "ou da revenda do chip.", "texto", "multigetrak.br"),
+    "USERPPP": ("Usuario do APN, se a operadora exigir.", "texto", "avatek"),
+    "PWPPP": ("Senha do APN, se a operadora exigir.", "texto", "avatek"),
     "NETSELECT": ("Em que rede ele registra.", "0/1/2 (ver opcoes)", ""),
 
     "FREQ": ("Com a ignicao LIGADA, de quantos em quantos segundos ele manda a "
@@ -262,9 +267,15 @@ CONSOLE = [
      "Ou so o nome, sem nada:  APN"),
     ("Gravar um parametro",
      "Ponha = e o valor:\\n\\n"
-     "   #FREQ=15                    grava 15 no FREQ\\n"
-     "   #APN=operadora.exemplo.br   grava o APN\\n\\n"
+     "   #FREQ=15        grava 15 no FREQ\\n"
+     "   #APN=avatek.br  grava o APN\\n\\n"
      "O historico mostra o valor antigo e o novo."),
+    ("Varios comandos de uma vez",
+     "Separe por ponto-e-virgula e eles saem em sequencia, um por quadro:\\n\\n"
+     "   szcs#freq=15;szcs#pulse=15\\n"
+     "   #APN;#SERVIP;#SERVPORT\\n\\n"
+     "No fim aparece um resumo dizendo qual comando respondeu e qual ficou "
+     "sem resposta."),
     ("Do jeito do fabricante",
      "Se voce esta acostumado com a ferramenta antiga, os prefixos dela "
      "funcionam igual:\\n\\n"

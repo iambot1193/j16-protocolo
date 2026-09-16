@@ -171,8 +171,17 @@ def aplicar(root, modo=None):
            background=[("pressed", ACENTO_ESC), ("active", ACENTO_ESC)],
            foreground=[("disabled", TXT3)])
 
+    # Desconectar derruba a sessao no meio de uma leitura: vermelho suave para
+    # nao ser clicado por engano, contorno (nao solido) para nao competir com
+    # o Enviar, que e a acao principal da tela.
+    st.configure("Danger.TButton", background=BG, foreground=ERRO,
+                 bordercolor=ERRO, relief="solid", borderwidth=1)
+    st.map("Danger.TButton",
+           background=[("pressed", CARD), ("active", CARD)],
+           foreground=[("disabled", TXT3)])
+
     st.configure("Outline.TButton", background=BG, foreground=ACENTO,
-                 bordercolor=ACENTO)
+                 bordercolor=ACENTO, relief="solid", borderwidth=1)
     st.map("Outline.TButton",
            background=[("pressed", CARD), ("active", CARD)],
            foreground=[("disabled", TXT3)])
@@ -194,7 +203,7 @@ def aplicar(root, modo=None):
                  padding=(10, 6), anchor="w")
     st.map("Cmd.TButton",
            background=[("pressed", BORDA), ("active", BORDA)],
-           foreground=[("active", ACENTO)],
+           foreground=[("disabled", TXT3), ("active", ACENTO)],
            bordercolor=[("active", ACENTO)])
 
     st.configure("Perigo.TButton", background=BG, foreground=ERRO,
@@ -350,6 +359,38 @@ class Badge(tk.Canvas):
 _popover_aberto = [None]
 
 
+def ajuda_no_hover(w, abrir, atraso=450):
+    """Abre o popover ao pousar o mouse sobre `w`; fecha ao sair.
+
+    Um '(i)' por parametro eram 106 icones numa coluna so -- ruido que competia
+    com o valor, que e o que o tecnico esta lendo. O texto continua o mesmo, so
+    muda o gatilho. O atraso evita balao piscando quando o mouse cruza a coluna.
+    """
+    pendente = [None]
+
+    def cancela():
+        if pendente[0]:
+            try:
+                w.after_cancel(pendente[0])
+            except Exception:
+                pass
+            pendente[0] = None
+
+    def entrou(e):
+        cancela()
+        pendente[0] = w.after(atraso, lambda: abrir(e))
+
+    def saiu(_e):
+        cancela()
+        fechar_popover()
+
+    w.configure(cursor="question_arrow")
+    w.bind("<Enter>", entrou, add="+")
+    w.bind("<Leave>", saiu, add="+")
+    w.bind("<Button-1>", lambda e: (cancela(), abrir(e)), add="+")
+    return w
+
+
 def popover(pai, titulo, linhas, x, y):
     """Balao de ajuda tematico perto de (x, y). So um aberto por vez -- abrir
     outro fecha o anterior, e clicar fora fecha. Fecha no Esc tambem."""
@@ -434,6 +475,132 @@ def icone_info(pai, on_click, fundo=None):
     return lbl
 
 
+# --- dialogos ---------------------------------------------------------------
+# Os messagebox/simpledialog do sistema vem brancos com fonte do Windows: no
+# meio de uma tela escura eles gritam, e no modo claro continuam com outra
+# borda e outro botao. Sao quatro widgets, entao valem o Toplevel proprio --
+# mesma moldura de card, mesma fonte e mesmos botoes do resto do programa.
+
+def _moldura(pai, titulo):
+    win = tk.Toplevel(pai)
+    win.title(titulo)
+    win.configure(bg=BG)
+    win.resizable(False, False)
+    win.transient(pai)
+    caixa = tk.Frame(win, bg=CARD, padx=22, pady=18,
+                     highlightbackground=BORDA, highlightthickness=1)
+    caixa.pack(padx=12, pady=12)
+    return win, caixa
+
+
+def _cabecalho(caixa, icone, cor, titulo, texto, largura=52):
+    linha = tk.Frame(caixa, bg=CARD)
+    linha.pack(fill="x", anchor="w")
+    tk.Label(linha, text=icone, bg=CARD, fg=cor,
+             font=(FONTE, 18)).pack(side="left", padx=(0, 14), anchor="n")
+    corpo = tk.Frame(linha, bg=CARD)
+    corpo.pack(side="left", fill="both", expand=True)
+    tk.Label(corpo, text=titulo, bg=CARD, fg=TXT,
+             font=F_TIT).pack(anchor="w")
+    # wraplength em pixel porque o texto vem com quebras proprias e frases
+    # longas: sem ele a janela estica atravessando a tela inteira.
+    tk.Label(corpo, text=texto, bg=CARD, fg=TXT2, font=F_TXT,
+             justify="left", anchor="w",
+             wraplength=largura * 7).pack(anchor="w", pady=(6, 0))
+    return corpo
+
+
+def _encerrar(win, pai, ao_fechar):
+    win.protocol("WM_DELETE_WINDOW", ao_fechar)
+    win.bind("<Escape>", lambda _e: ao_fechar())
+    win.update_idletasks()
+    x = pai.winfo_rootx() + (pai.winfo_width() - win.winfo_width()) // 2
+    y = pai.winfo_rooty() + (pai.winfo_height() - win.winfo_height()) // 3
+    win.geometry(f"+{max(x, 0)}+{max(y, 0)}")
+    win.grab_set()
+    win.focus_set()
+    win.wait_window()
+
+
+def perguntar(pai, titulo, texto, perigo=False):
+    """Sim/Nao no tema. Devolve True so no Sim -- fechar no X, Escape e o Nao
+    caem todos em False, que e o lado seguro de toda pergunta que o programa
+    faz (apagar campo, reiniciar aparelho, FACTORY)."""
+    resposta = [False]
+    win, caixa = _moldura(pai, titulo)
+    _cabecalho(caixa, "!" if perigo else "?", ALERTA if perigo else ACENTO,
+               titulo, texto)
+
+    def responde(valor):
+        resposta[0] = valor
+        win.destroy()
+
+    rodape = tk.Frame(caixa, bg=CARD)
+    rodape.pack(fill="x", pady=(18, 0))
+    nao = ttk.Button(rodape, text="Nao", style="Primary.TButton",
+                     command=lambda: responde(False))
+    nao.pack(side="right")
+    ttk.Button(rodape, text="Sim",
+               style="Perigo.TButton" if perigo else "Outline.TButton",
+               command=lambda: responde(True)).pack(side="right", padx=(0, 8))
+    # O foco comeca no Nao de proposito: Enter batido por reflexo nao pode
+    # disparar um comando que nao tem volta.
+    nao.focus_set()
+    win.bind("<Return>", lambda _e: responde(False))
+    _encerrar(win, pai, lambda: responde(False))
+    return resposta[0]
+
+
+_ICONE_AVISO = {"info": ("i", ACENTO), "alerta": ("!", ALERTA),
+                "erro": ("x", ERRO)}
+
+
+def avisar(pai, titulo, texto, tipo="info"):
+    """Aviso de uma via, no tema. tipo: 'info', 'alerta' ou 'erro'."""
+    # a cor e lida na hora da chamada, nao no import: entre um e outro o
+    # usuario pode ter trocado de modo, e o dicionario guarda o valor antigo.
+    icone = _ICONE_AVISO.get(tipo, _ICONE_AVISO["info"])[0]
+    cor = {"info": ACENTO, "alerta": ALERTA, "erro": ERRO}.get(tipo, ACENTO)
+    win, caixa = _moldura(pai, titulo)
+    _cabecalho(caixa, icone, cor, titulo, texto)
+    rodape = tk.Frame(caixa, bg=CARD)
+    rodape.pack(fill="x", pady=(18, 0))
+    btn = ttk.Button(rodape, text="Fechar", style="Primary.TButton",
+                     command=win.destroy)
+    btn.pack(side="right")
+    btn.focus_set()
+    win.bind("<Return>", lambda _e: win.destroy())
+    _encerrar(win, pai, win.destroy)
+
+
+def pedir_texto(pai, titulo, texto, inicial=""):
+    """Uma linha de entrada, no tema. Devolve o texto ja sem espacos nas
+    pontas, ou None se cancelou -- o chamador so precisa testar None."""
+    resposta = [None]
+    win, caixa = _moldura(pai, titulo)
+    corpo = _cabecalho(caixa, "✎", ACENTO, titulo, texto)
+    var = tk.StringVar(value=inicial)
+    campo = ttk.Entry(corpo, textvariable=var, width=38, font=F_TXT)
+    campo.pack(fill="x", pady=(12, 0))
+
+    def confirma():
+        valor = var.get().strip()
+        resposta[0] = valor or None
+        win.destroy()
+
+    rodape = tk.Frame(caixa, bg=CARD)
+    rodape.pack(fill="x", pady=(18, 0))
+    ttk.Button(rodape, text="OK", style="Primary.TButton",
+               command=confirma).pack(side="right")
+    ttk.Button(rodape, text="Cancelar", style="Outline.TButton",
+               command=win.destroy).pack(side="right", padx=(0, 8))
+    campo.focus_set()
+    campo.select_range(0, "end")
+    win.bind("<Return>", lambda _e: confirma())
+    _encerrar(win, pai, win.destroy)
+    return resposta[0]
+
+
 def selftest():
     # as duas paletas tem exatamente as mesmas chaves, senao trocar deixa
     # widget com cor de modo que nao existe mais
@@ -466,8 +633,27 @@ def selftest():
     assert corpo.cget("bg") == CARD, (corpo.cget("bg"), CARD)
     trocar(r, "escuro")
     assert corpo.cget("bg") == escuro_card
+
+    # Os dialogos sao modais: o unico jeito de testar sem alguem clicando e
+    # agendar o fechamento antes de abrir. O que importa aqui e o lado seguro
+    # -- fechar no X nunca pode valer "Sim" numa pergunta que apaga coisa.
+    def fecha_o_que_abrir():
+        for w in r.winfo_children():
+            if isinstance(w, tk.Toplevel):
+                w.destroy()
+
+    r.after(120, fecha_o_que_abrir)
+    assert perguntar(r, "Teste", "fechar tem de valer Nao") is False
+    r.after(120, fecha_o_que_abrir)
+    assert perguntar(r, "Teste", "idem no modo perigo", perigo=True) is False
+    r.after(120, fecha_o_que_abrir)
+    assert pedir_texto(r, "Teste", "cancelar devolve None") is None
+    r.after(120, fecha_o_que_abrir)
+    assert avisar(r, "Teste", "aviso fecha sem travar") is None
+
     r.destroy()
-    print("tema selftest ok -", len(cores), "cores,", len(PALETAS), "paletas")
+    print("tema selftest ok -", len(cores), "cores,", len(PALETAS),
+          "paletas, 4 dialogos")
 
 
 if __name__ == "__main__":
