@@ -50,7 +50,7 @@ GRUPO = {
 # (o que faz, formato, exemplo). Exemplo vazio quando nao faz sentido.
 CAMPO = {
     "SERVIP": ("Endereco IP do servidor que recebe a posicao.",
-               "IP ou dominio", "200.152.62.20"),
+               "IP ou dominio", "203.0.113.10"),
     "SERVPORT": ("Porta TCP desse servidor.", "1 a 65535", "5023"),
     "DNS_ENABLE": ("Liga a resolucao de nome: use so se o servidor for dominio, "
                    "nao IP.", "0 nao / 1 sim", ""),

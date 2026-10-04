@@ -841,7 +841,7 @@ def _pblog(txt):
     csq = _depois(corpo, "CSQ")
     if csq and csq.isdigit():
         moni["CSQ"] = f"{csq} ({_qualidade(int(csq))})"
-    dns = _depois(corpo, "DNS", ate=";")       # "200.152.062.020:13346"
+    dns = _depois(corpo, "DNS", ate=";")       # "203.000.113.010:13346"
     if dns and ":" in dns:
         ip, _, porta = dns.rpartition(":")
         if porta.isdigit():
@@ -917,7 +917,7 @@ def _teste(txt):
     if chave == "REG" and valor in ("OK", "NG"):
         return {"REG": "sim" if valor == "OK" else "nao"}, {}
     if chave == "IP1":
-        ip, _, porta = valor.rpartition(":")     # "200.152.062.020:13346"
+        ip, _, porta = valor.rpartition(":")     # "203.000.113.010:13346"
         if ip and porta.isdigit():
             return {}, {"SERVIP": ip, "SERVPORT": porta}
     # o checklist de autoteste (CEXTV/GPS/CSQ/ACC/...) e OK/NG: e STATUS, nao
@@ -1297,8 +1297,8 @@ def selftest():
     assert m == {"Battery": "4.25 V"}, m
     m, _ = parse_cantrack("SATVAL:    19")
     assert m == {"Satellite": "19"}, m
-    _, c = parse_cantrack("IP1:200.152.062.020:13346")
-    assert c == {"SERVIP": "200.152.062.020", "SERVPORT": "13346"}, c
+    _, c = parse_cantrack("IP1:203.000.113.010:13346")
+    assert c == {"SERVIP": "203.000.113.010", "SERVPORT": "13346"}, c
     m, _ = parse_cantrack("REG:    NG")
     assert m == {"REG": "nao"}, m
     # checklist do autoteste vira status, nao dado -- nao sobrescreve campo bom
@@ -1317,7 +1317,7 @@ def selftest():
     assert c["IMSI"] == "724990000000001" and c["ICCID"].startswith("8955"), c
     m, _ = parse_cantrack("-->LOWP:1; VKK:12123,BAT:4276,100%; ES:0,0,0,0")
     assert m["Voltage"] == "12.12 V" and m["Battery"] == "4.28 V", m
-    _, c = parse_cantrack("-->[0]DNS:200.152.062.020:13346; HS:52,HM:0;CM:0;"
+    _, c = parse_cantrack("-->[0]DNS:203.000.113.010:13346; HS:52,HM:0;CM:0;"
                           " HT:180,300; RE:8000,0;")
     assert c["SERVPORT"] == "13346" and c["HBT"] == "180,300", c
     m, _ = parse_cantrack("-->CURNET:LTE,Online;NWM:0")

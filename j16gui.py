@@ -4292,10 +4292,10 @@ def selftest():
     # gravar so e sucesso quando a releitura bate -- o caso do SERVIP que
     # "reseta sozinho" tem de cair em divergente, nunca em confirmado
     ok, div, mudos, _nc = comparar_gravacao(
-        {"FREQ": "15", "SERVIP": "200.152.62.20", "APN": "x.br"},
+        {"FREQ": "15", "SERVIP": "203.0.113.10", "APN": "x.br"},
         {"FREQ": "15", "SERVIP": "58.61.156.56"})
     assert ok == ["FREQ"], ok
-    assert div == [("SERVIP", "200.152.62.20", "58.61.156.56")], div
+    assert div == [("SERVIP", "203.0.113.10", "58.61.156.56")], div
     assert mudos == ["APN"], mudos
     # lixo da serial nao pode virar divergencia falsa
     assert comparar_gravacao({"FREQ": "15"}, {"FREQ": "15\x00 "})[0] == ["FREQ"]
@@ -4354,7 +4354,7 @@ def selftest():
     assert set(proto.CANTRACK_PARAMS) - _sem_comando <= _legiveis, \
         set(proto.CANTRACK_PARAMS) - _sem_comando - _legiveis
     _ok, _div, _mudos, _nconf = comparar_gravacao(
-        {"PULSE": "20", "SERVIP": "200.152.62.20", "APN": "x.br"},
+        {"PULSE": "20", "SERVIP": "203.0.113.10", "APN": "x.br"},
         {"PULSE": "20"},
         sem_leitura={"SERVIP", "APN"})
     assert _ok == ["PULSE"] and not _div and not _mudos, (_ok, _div, _mudos)
